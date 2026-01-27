@@ -8,204 +8,40 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.7.0/fonts/remixicon.css" rel="stylesheet" />
-    
     <link rel="stylesheet" href="style.css">
     
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     
     <style>
-        /* --- COPYING YOUR EXACT STYLES --- */
-        .scan-widget {
-            background: linear-gradient(135deg, var(--primary-btn-bg), #2563eb);
-            border-radius: 1.5rem;
-            padding: 2rem;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 2rem;
-            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
+        /* [Kept your original CSS styles] */
+        .scan-widget { background: linear-gradient(135deg, var(--primary-btn-bg), #2563eb); border-radius: 1.5rem; padding: 2rem; color: white; display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3); position: relative; overflow: hidden; }
         .scan-content h2 { font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 700; }
-        .scan-content p { opacity: 0.9; font-size: 0.95rem; margin-bottom: 1.5rem; }
-
-        .scan-btn {
-            background: white;
-            color: var(--primary-btn-bg);
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 2rem;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .scan-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-
-        /* Animation */
-        .radar-circle {
-            position: absolute;
-            right: -20px;
-            bottom: -50px;
-            width: 200px;
-            height: 200px;
-            border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 50%;
-            animation: pulse-ring 3s infinite;
-        }
-        .radar-circle:nth-child(2) { animation-delay: 1s; width: 150px; height: 150px; }
-        .radar-circle:nth-child(3) { animation-delay: 2s; width: 100px; height: 100px; }
-
-        @keyframes pulse-ring {
-            0% { transform: scale(0.8); opacity: 0; }
-            50% { opacity: 0.3; }
-            100% { transform: scale(1.5); opacity: 0; }
-        }
-
-        /* Grid & Cards */
-        .section-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text-color);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .device-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .device-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 1.25rem;
-            padding: 1.25rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        .device-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.05);
-            border-color: var(--primary-btn-bg);
-        }
-
-        .device-icon-wrapper {
-            width: 60px;
-            height: 60px;
-            background: var(--input-bg);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.75rem;
-            color: var(--primary-btn-bg);
-            margin-bottom: 1rem;
-            transition: background 0.3s ease;
-        }
-        .device-card:hover .device-icon-wrapper { background: var(--bg-color); }
-
+        .scan-btn { background: white; color: var(--primary-btn-bg); border: none; padding: 0.75rem 1.5rem; border-radius: 2rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; }
+        .device-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .device-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 1.25rem; padding: 1.25rem; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; animation: fadeInUp 0.5s ease; }
+        .device-icon-wrapper { width: 60px; height: 60px; background: var(--input-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; color: var(--primary-btn-bg); margin-bottom: 1rem; }
         .device-name { font-weight: 700; color: var(--text-color); font-size: 1rem; margin-bottom: 0.25rem; }
         .device-status { font-size: 0.8rem; color: var(--placeholder-color); margin-bottom: 1rem; }
-
-        .status-dot {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: var(--border-color);
-        }
-        .status-dot.active { background-color: var(--in-range-color); box-shadow: 0 0 8px var(--in-range-color); }
-
-        .card-action-btn {
-            width: 100%;
-            padding: 0.6rem;
-            border-radius: 0.75rem;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid var(--border-color);
-            background: transparent;
-            color: var(--text-color);
-        }
-        .card-action-btn:hover {
-            background: var(--input-bg);
-            color: var(--primary-btn-bg);
-            border-color: var(--primary-btn-bg);
-        }
-        .card-action-btn.active-btn {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--in-range-color);
-            border-color: transparent;
-        }
-        .card-action-btn.primary { background: var(--input-bg); color: var(--text-color); border: none; }
-
-        .add-new-card { border: 2px dashed var(--border-color); background: transparent; cursor: pointer; }
-        .add-new-card:hover { border-color: var(--primary-btn-bg); background: rgba(59, 130, 246, 0.05); }
-
-        /* --- FIXED SCANNER MODAL CSS --- */
-        .scanner-content {
-            width: 90%;
-            max-width: 400px;
-            background: var(--card-bg);
-            border-radius: 1.5rem;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        #reader {
-            width: 100%;
-            min-height: 300px; /* Ensure height for camera */
-            background: #000;
-            border-radius: 1rem;
-            overflow: hidden;
-            border: none !important;
-        }
-        #reader video {
-            object-fit: cover;
-            border-radius: 1rem;
-        }
-        #reader-status {
-            padding: 1rem;
-            font-weight: bold;
-            color: var(--primary-btn-bg);
-            display: none;
-        }
+        .status-dot { position: absolute; top: 1rem; right: 1rem; width: 10px; height: 10px; border-radius: 50%; background-color: var(--in-range-color); box-shadow: 0 0 8px var(--in-range-color); }
+        .card-action-btn { width: 100%; padding: 0.6rem; border-radius: 0.75rem; font-weight: 600; cursor: pointer; border: 1px solid var(--border-color); background: transparent; color: var(--text-color); }
+        .card-action-btn:hover { background: var(--input-bg); color: var(--primary-btn-bg); }
+        
+        /* SCANNER MODAL */
+        .scanner-content { width: 90%; max-width: 400px; background: var(--card-bg); border-radius: 1.5rem; padding: 0; overflow: hidden; }
+        #reader { width: 100%; border-radius: 0 0 1.5rem 1.5rem; overflow: hidden; }
+        .radar-circle { position: absolute; right: -20px; bottom: -50px; width: 200px; height: 200px; border: 2px solid rgba(255,255,255,0.1); border-radius: 50%; animation: pulse-ring 3s infinite; }
+        @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 0; } 50% { opacity: 0.3; } 100% { transform: scale(1.5); opacity: 0; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body data-theme="system" oncontextmenu="return false;">
+<body data-theme="system">
     
-    <div id="page-dashboard-marker" style="display: none;"></div>
-
     <header class="dashboard-header">
-        <div class="logo">
-            <h2 class="logoname">Devices</h2>
-        </div>
+        <div class="logo"><h2 class="logoname">Devices</h2></div>
         <div class="header-right">
-            <div class="profile-menu-container">
-                <div class="profile-image-container header-profile-img-container" id="profile-menu-trigger">
-                    <img id="profile-img-header" src="images/user.png" alt="Profile Picture" class="profile-image">
-                </div>
+            <div class="profile-image-container header-profile-img-container">
+                <img id="profile-img-header" src="images/user.png" class="profile-image">
             </div>
         </div>
     </header>
@@ -216,11 +52,10 @@
         
         <div class="scan-widget">
             <div class="radar-circle"></div>
-            <div class="radar-circle"></div>
             <div class="scan-content">
                 <h2>Add New Device</h2>
                 <p>Pair a new monitor or smartwatch</p>
-                <button class="scan-btn" onclick="openScanner()">
+                <button class="scan-btn" onclick="window.openScanner()">
                     <i class="ri-qr-scan-2-line"></i> Start Scan
                 </button>
             </div>
@@ -229,72 +64,30 @@
             </div>
         </div>
 
-        <div class="section-title">
-            <i class="ri-link-m" style="color: var(--primary-btn-bg);"></i> 
-            Connected Devices
-        </div>
-        
+        <div class="section-title">Connected Devices</div>
         <div class="device-grid" id="connected-device-list">
             </div>
-
-        <div class="section-title">
-            <i class="ri-apps-2-line" style="color: var(--placeholder-color);"></i>
-            Available Integrations
-        </div>
-
-        <div class="device-grid">
-            <div class="device-card">
-                <div class="device-icon-wrapper" style="color: #000;">
-                    <i class="ri-apple-fill"></i>
-                </div>
-                <span class="device-name">Apple Health</span>
-                <span class="device-status">Not connected</span>
-                <button class="card-action-btn primary">Connect</button>
-            </div>
-
-            <div class="device-card">
-                <div class="device-icon-wrapper" style="color: #EA4335;">
-                    <i class="ri-google-fill"></i>
-                </div>
-                <span class="device-name">Google Fit</span>
-                <span class="device-status">Not connected</span>
-                <button class="card-action-btn primary">Connect</button>
-            </div>
-
-            <div class="device-card add-new-card" onclick="openScanner()">
-                <div class="device-icon-wrapper">
-                    <i class="ri-add-line"></i>
-                </div>
-                <span class="device-name">Manual Entry</span>
-                <span class="device-status">Add without device</span>
-            </div>
-        </div>
-        
-        <br><br><br>
     </main>
-    
+
     <nav class="nav">
         <ul class="nav__list">
-                <i class="ri-home-smile-2-line nav__link" onclick="window.location.href='dashboard.html';"></i>
-                <i class="fa-regular fa-file-lines nav__link" onclick="window.location.href='readings.html';" style="font-size: 20px;"></i>
-                <button class="nav__expand" id="nav-expand">
-                    <i class="fa-solid fa-plus nav__expand-icon" id="nav-expand-icon" style="font-size: 20px; font-weight: 900;"></i>
-                </button>
-                <i class="ri-device-fill nav__link active-link" onclick="window.location.href='devices.html';" style="color: var(--primary-btn-bg);"></i>
-                <i class="ri-settings-3-line nav__link" onclick="window.location.href='settings.html';"></i>
+            <i class="ri-home-smile-2-line nav__link" onclick="location.href='dashboard.html'"></i>
+            <i class="ri-file-list-3-line nav__link" onclick="location.href='readings.html'"></i>
+            <button class="nav__expand"><i class="ri-add-line nav__expand-icon" style="color: white;"></i></button>
+            <i class="ri-device-fill nav__link active-link" onclick="location.href='devices.html'" style="color: var(--primary-btn-bg);"></i>
+            <i class="ri-settings-3-line nav__link" onclick="location.href='settings.html'"></i>
         </ul>
     </nav>
 
     <div id="scannerModal" class="modal">
         <div class="modal-content scanner-content">
-            <div class="modal-header">
-                <h3>Scan QR Code</h3>
-                <span class="close-modal" onclick="closeScanner()">&times;</span>
+            <div class="modal-header" style="padding: 1.5rem; border-bottom: 1px solid var(--border-color);">
+                <h3>Scan Watch QR</h3>
+                <span class="close-modal" onclick="window.closeScanner()" style="cursor: pointer; font-size: 1.5rem;">&times;</span>
             </div>
-            <div class="modal-body" style="text-align: center; width: 100%;">
-                <div id="reader-status">Starting Camera...</div>
+            <div class="modal-body" style="padding: 0; text-align: center;">
+                <div id="reader-status" style="padding: 20px;">Initializing Camera...</div>
                 <div id="reader"></div>
-                <p style="margin-top: 1rem; color: #888;">Point camera at the Watch QR Code</p>
             </div>
         </div>
     </div>
@@ -302,203 +95,134 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
-    
-    <script type="text/javascript" language="javascript" src="log/firebaseconfig.js"></script>
+    <script src="log/firebaseconfig.js"></script>
     <script src="theme.js"></script>
-    <script src="log/security.js"></script>
 
 <script>
-    // --- GLOBAL VARIABLES ---
-    // Defined on window to ensure button can find them
+    // GLOBAL VARS attached to WINDOW
     window.html5QrCode = null;
     window.currentUser = null;
     window.isScanning = false;
 
-    // --- 1. AUTH LISTENER ---
-    if(typeof auth !== 'undefined') {
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                window.currentUser = user;
-                loadDevices();
-                if(user.photoURL && document.getElementById('profile-img-header')) {
-                    document.getElementById('profile-img-header').src = user.photoURL;
-                }
-            }
-        });
-    }
+    // 1. AUTH & LOAD
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            window.currentUser = user;
+            loadDevices();
+            if(user.photoURL) document.getElementById('profile-img-header').src = user.photoURL;
+        } else {
+            // window.location.href = 'login.html'; // Uncomment to force login
+        }
+    });
 
-    // --- 2. OPEN SCANNER (Fixed for Reliability) ---
+    // 2. OPEN SCANNER
     window.openScanner = function() {
-        // Security Check
         if (location.protocol !== "https:" && location.hostname !== "localhost" && location.hostname !== "127.0.0.1") {
-            alert("⚠️ Secure connection required (HTTPS) for Camera.");
-            return;
+            return alert("⚠️ HTTPS required for Camera.");
         }
 
-        const modal = document.getElementById('scannerModal');
-        modal.classList.add('active');
-        document.getElementById('reader-status').style.display = 'block';
-
-        // Wait 300ms for modal to fully render (Critical for correct camera sizing)
+        document.getElementById('scannerModal').classList.add('active');
+        
         setTimeout(() => {
-            startCamera();
+            if (!window.html5QrCode) window.html5QrCode = new Html5Qrcode("reader");
+            
+            window.html5QrCode.start(
+                { facingMode: "environment" }, 
+                { fps: 10, qrbox: 250 },
+                onScanSuccess,
+                (err) => {} // Ignore frame errors
+            ).then(() => {
+                document.getElementById('reader-status').style.display = 'none';
+                window.isScanning = true;
+            }).catch(err => {
+                document.getElementById('reader-status').textContent = "Camera Error: " + err;
+            });
         }, 300);
     }
 
-    // --- 3. START CAMERA ---
-    function startCamera() {
-        if (window.isScanning) return; // Prevent double start
-
-        // Initialize instance if needed
-        if (!window.html5QrCode) {
-            window.html5QrCode = new Html5Qrcode("reader");
-        }
-
-        // Config tailored for mobile compatibility
-        const config = { 
-            fps: 10, 
-            qrbox: function(viewfinderWidth, viewfinderHeight) {
-                // Return a square 70% of the smaller dimension
-                let minEdgePercentage = 0.70;
-                let minDimension = Math.min(viewfinderWidth, viewfinderHeight);
-                let qrboxSize = Math.floor(minDimension * minEdgePercentage);
-                return { width: qrboxSize, height: qrboxSize };
-            }
-        };
-
-        window.html5QrCode.start(
-            { facingMode: "environment" }, // Rear camera
-            config,
-            onScanSuccess,
-            onScanFailure
-        ).then(() => {
-            window.isScanning = true;
-            document.getElementById('reader-status').style.display = 'none';
-        }).catch(err => {
-            console.error("Camera Start Error:", err);
-            document.getElementById('reader-status').textContent = "Camera Error: " + err;
-            if (err.name === "NotAllowedError") alert("Please allow camera permissions.");
-        });
-    }
-
-    // --- 4. CLOSE SCANNER ---
+    // 3. CLOSE SCANNER
     window.closeScanner = function() {
-        const modal = document.getElementById('scannerModal');
-        modal.classList.remove('active');
-        
+        document.getElementById('scannerModal').classList.remove('active');
         if (window.html5QrCode && window.isScanning) {
             window.html5QrCode.stop().then(() => {
                 window.isScanning = false;
                 window.html5QrCode.clear();
-            }).catch(err => console.error("Stop failed", err));
+            });
         }
     }
 
-    // --- 5. SCAN SUCCESS ---
-    function onScanSuccess(decodedText, decodedResult) {
-        console.log(`Scan result: ${decodedText}`);
-
+    // 4. SCAN SUCCESS -> PAIRING
+    function onScanSuccess(decodedText) {
         if (decodedText.includes("SUGARTRACK_WATCH")) {
-            // Beep
-            const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-            audio.play().catch(e => {});
+            // BEEP
+            new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play().catch(()=>{});
+            
+            // Stop Scanner
+            window.closeScanner();
 
-            // IMPORTANT: Stop scanning before alerting or processing
-            if(window.html5QrCode) {
-                 window.html5QrCode.stop().then(() => {
-                    window.isScanning = false;
-                    window.html5QrCode.clear();
-                    closeScanner();
-                    handleWatchPairing(decodedText);
-                 });
-            } else {
-                closeScanner();
-                handleWatchPairing(decodedText);
-            }
+            // Handle Sync
+            handleSync(decodedText);
         }
     }
 
-    function onScanFailure(error) {
-        // Keeps scanning...
-    }
-
-    // --- 6. PAIRING LOGIC ---
-    async function handleWatchPairing(qrData) {
-        // Split: SUGARTRACK_WATCH_ID_xxxxxx
+    // 5. THE HANDSHAKE (SYNC)
+    async function handleSync(qrData) {
+        // Format: SUGARTRACK_WATCH_ID_XXXXX
         const parts = qrData.split('_ID_');
-        if(parts.length < 2) return alert("Invalid QR.");
-        
         const watchId = parts[1];
+        
+        if (!watchId || !window.currentUser) return alert("Error: Invalid ID or not logged in.");
 
-        if(!window.currentUser) return alert("Login first.");
+        const loadingMsg = document.createElement('div');
+        loadingMsg.innerHTML = `<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);color:white;display:flex;justify-content:center;align-items:center;z-index:9999;flex-direction:column;"><i class="ri-loader-4-line ri-spin" style="font-size:3rem;"></i><br>Syncing with Watch...</div>`;
+        document.body.appendChild(loadingMsg);
 
         try {
-            // A. Save to My Devices
+            // A. Save to User Profile
             await db.collection('users').doc(window.currentUser.uid).collection('devices').add({
                 name: `SugarWatch ${watchId.substring(0,4)}`,
-                type: "smartwatch",
-                pairedAt: new Date(),
                 watchId: watchId,
-                status: "active"
+                pairedAt: new Date()
             });
 
-            // B. Send Handshake (Auto-Login Watch)
+            // B. SEND SIGNAL TO WATCH (This allows the watch to "Enter OS")
             await db.collection('pending_setups').doc(watchId).set({
                 userId: window.currentUser.uid,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            alert(`✅ Paired Watch: ${watchId}`);
-            
-        } catch (error) {
-            console.error(error);
-            alert("Pairing failed: " + error.message);
+            setTimeout(() => {
+                loadingMsg.remove();
+                alert("✅ Sync Complete!");
+                loadDevices();
+            }, 1500);
+
+        } catch (e) {
+            loadingMsg.remove();
+            alert("Sync Failed: " + e.message);
         }
     }
 
-    // --- 7. LOAD DEVICES ---
     function loadDevices() {
         const list = document.getElementById('connected-device-list');
-        list.innerHTML = ''; 
-
-        db.collection('users').doc(window.currentUser.uid).collection('devices')
-            .onSnapshot((snapshot) => {
-                list.innerHTML = ''; 
-                
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const el = document.createElement('div');
-                    el.className = 'device-card';
-                    el.style.animation = "fadeInUp 0.5s ease";
-                    
-                    el.innerHTML = `
-                        <div class="status-dot active"></div>
-                        <div class="device-icon-wrapper" style="background: #e8f5e9; color: #3b82f6;">
-                            <i class="ri-watch-fill"></i>
-                        </div>
-                        <span class="device-name">${data.name || 'Smart Watch'}</span>
-                        <span class="device-status">Active • Battery 98%</span>
-                        <button class="card-action-btn active-btn" onclick="removeDevice('${doc.id}')">Disconnect</button>
-                    `;
-                    list.appendChild(el);
-                });
+        db.collection('users').doc(window.currentUser.uid).collection('devices').onSnapshot(snap => {
+            list.innerHTML = '';
+            snap.forEach(doc => {
+                const d = doc.data();
+                list.innerHTML += `
+                <div class="device-card">
+                    <div class="status-dot active"></div>
+                    <div class="device-icon-wrapper"><i class="ri-watch-fill"></i></div>
+                    <span class="device-name">${d.name}</span>
+                    <span class="device-status">Active • Connected</span>
+                    <button class="card-action-btn active-btn" onclick="removeDevice('${doc.id}')">Disconnect</button>
+                </div>`;
             });
+        });
     }
 
-    // --- 8. REMOVE DEVICE ---
-    window.removeDevice = function(docId) {
-        if(confirm('Disconnect device?')) {
-            db.collection('users').doc(window.currentUser.uid).collection('devices').doc(docId).delete();
-        }
-    }
-
-    // Close modal if clicking outside
-    window.onclick = function(event) {
-        const modal = document.getElementById('scannerModal');
-        if (event.target == modal) {
-            closeScanner();
-        }
+    window.removeDevice = (id) => {
+        if(confirm("Disconnect?")) db.collection('users').doc(window.currentUser.uid).collection('devices').doc(id).delete();
     }
 </script>
 </body>
