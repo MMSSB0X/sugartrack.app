@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SweetOS Watch</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="log/firebaseconfig.js"></script> 
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- YOUR ORIGINAL CSS --- */
+        :root { --bezel-color: #2b2b2b; --strap-color: #1a1a1a; --screen-bg: #000000; --accent: #00E676; }
+        body { margin: 0; background-color: #000000; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; overflow: hidden; }
+        .watch-container { position: relative; width: 320px; height: 400px; display: flex; justify-content: center; align-items: center; }
+        .strap { position: absolute; width: 180px; height: 100%; background: #1a1a1a; border-radius: 40px; z-index: 1; }
+        .strap.top { top: -100px; } .strap.bottom { bottom: -100px; }
+        .case { position: relative; width: 300px; height: 300px; background: linear-gradient(145deg, #3a3a3a, #1a1a1a); border-radius: 50%; z-index: 5; display: flex; justify-content: center; align-items: center; box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+        .screen { width: 270px; height: 270px; background-color: black; border-radius: 50%; position: relative; overflow: hidden; z-index: 10; color: white; text-align: center; }
+        
+        .view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; visibility: hidden; transition: 0.4s; display: flex; flex-direction: column; align-items: center; justify-content: center; transform: scale(0.9); }
+        .view.active { opacity: 1; visibility: visible; transform: scale(1); }
+        
+        /* QR Style */
+        .qr-container { background: white; padding: 10px; border-radius: 12px; margin-bottom: 5px; }
+        .qr-img { width: 130px; height: 130px; }
+
+        /* Watch Face */
+        .time-large { font-size: 56px; font-weight: 200; line-height: 1; margin: 10px 0; }
+        .complication { background: rgba(255,255,255,0.15); padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 8px; }
+        .glucose-val { font-size: 22px; font-weight: bold; }
+
+        /* Settings */
+        .btn-disconnect { background: #333; color: #ff4444; border: 1px solid #ff4444; padding: 10px 20px; border-radius: 20px; margin-top: 20px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="watch-container">
+        <div class="strap top"></div><div class="strap bottom"></div>
+        <div class="case">
+            <div class="screen">
+                
+                <div id="view-login" class="view active">
+                    <div style="font-size: 14px; margin-bottom: 5px;">Scan to Pair</div>
+                    <div class="qr-container">
+                        <img id="qr-image" class="qr-img" src="" alt="QR">
+                    </div>
+                    <div id="status-text" style="font-size: 10px; color: #aaa;">Generating ID...</div>
+                </div>
+
+                <div id="view-face" class="view" onclick="navigate('settings')">
+                    <div style="color:var(--accent);">TODAY</div>
+                    <div id="time-display" class="time-large">--:--</div>
+                    <div class="complication">
+                        <i class="fa-solid fa-droplet" style="color:#00E676"></i>
+                        <div>
+                            <span id="live-glucose" class="glucose-val">--</span> mg/dL
+                        </div>
+                    </div>
+                    <div style="font-size:10px; margin-top:10px; opacity:0.6">Tap for Settings</div>
+                </div>
+
+                <div id="view-settings" class="view">
+                    <h3>Settings</h3>
+                    
+                    <div class="btn-disconnect" onclick="disconnectWatch()">Disconnect</div>
+                    
+                    <div style="margin-top:15px; font-size:12px; text-decoration:underline; cursor:pointer;" onclick="navigate('face')">
+                        <i class="fa-solid fa-arrow-left"></i> Back to Home
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- LOGIC ---
+        let watchId = localStorage.getItem('watch_id');
+        const savedUserId = localStorage.getItem('paired_user_id');
+
+        // Generate ID if missing
+        if (!watchId) {
+            watchId = Math.random().toString(36).substr(2, 9).toUpperCase(); 
+            localStorage.setItem('watch_id', watchId);
+        }
+
+        // Initialize based on state
+        if (savedUserId) {
+            completePairing(savedUserId);
+        } else {
+            setupPairingMode();
+        }
+
+        // --- PAIRING MODE ---
+        function setupPairingMode() {
+            navigate('login');
+            
+            document.getElementById('status-text').textContent = `ID: ${watchId}`;
+            const qrData = `SUGARTRACK_WATCH_ID_${watchId}`;
+            document.getElementById('qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrData}`;
+
+            // Listen for Phone
+            const unsubscribe = db.collection('pending_setups').doc(watchId)
+                .onSnapshot((doc) => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        if (data.userId) {
+                            localStorage.setItem('paired_user_id', data.userId);
+                            db.collection('pending_setups').doc(watchId).delete(); 
+                            unsubscribe();
+                            completePairing(data.userId);
+                        }
+                    }
+                });
+        }
+
+        // --- CONNECTED MODE ---
+        function completePairing(userId) {
+            navigate('face');
+            
+            // Listen to data
+            db.collection('readings')
+                .where('userId', '==', userId)
+                .orderBy('timestamp', 'desc')
+                .limit(1)
+                .onSnapshot((snapshot) => {
+                    if (!snapshot.empty) {
+                        const data = snapshot.docs[0].data();
+                        const val = data.glucose || data.sugar_level || '--';
+                        document.getElementById('live-glucose').textContent = val;
+                    }
+                });
+        }
+
+        // --- NAVIGATION ---
+        function navigate(viewId) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+        }
+
+        function disconnectWatch() {
+            if(confirm('Disconnect?')) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        // Clock
+        setInterval(() => {
+            const d = new Date();
+            document.getElementById('time-display').textContent = 
+                `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        }, 1000);
+    </script>
+</body>
+</html>
