@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ... head content ... -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - SugarTrack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/font-awesome-icons7/css/all.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.7.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/remix-icons/remixicon.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<!-- Removed bottom padding that was for the mobile nav -->
+<body style="padding-bottom: 0 !important;"><!-- <body data-theme="system" style="padding-bottom: 0 !important;"> -->
+
+    <!-- Marker for JS to identify this page -->
+    <div id="page-settings-marker" style="display: none;"></div>
+
+    <!-- SETTINGS HEADER IS NOW OUTSIDE/ABOVE MAIN -->
+    <div class="settings-header">
+        <button class="back-button" id="settings-back-btn" onclick="window.location.href='settings.html';">
+        <!-- <button class="back-button" id="settings-back-btn" onclick="history.back()"> -->
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <h2>Profile</h2>
+    </div>
+
+    <main class="dashboard-container settings-page-new2">
+        <!-- The header was here, but has been moved up -->
+<!-- 
+        <div class="profile-section2">
+            <div class="profile-image-large-container2">
+                <img id="profile-img-settings" src="images/user.png" alt="Profile Picture" class="profile-image-large">
+
+
+                <button id="profile-edit-btn" class="profile-edit-btn" title="Change Profile Picture">
+                    <i class="fas fa-pencil-alt"></i>
+                </button>
+            </div>
+
+        </div> -->
+<div class="profile-section2">
+  <!-- NEW WRAPPER -->
+  <div class="profile-avatar-wrap">
+    <div class="profile-image-large-container2">
+      <img id="profile-img-settings" src="images/user.png" alt="Profile Picture" class="profile-image-large">
+    </div>
+
+    <button id="profile-edit-btn" class="profile-edit-btn" title="Change Profile Picture" aria-label="Change profile picture">
+      <i class="fas fa-pencil-alt" aria-hidden="true"></i>
+    </button>
+  </div>
+</div>
+
+        <div class="settings-group">
+            <h3>Profile Details</h3>
+            <ul class="settings-list">
+                <li class="settings-list-item" onclick="window.location.href='name.html';">
+                    <div class="item-icon"><i class="fas fa-user"></i></div>
+                    <div class="item-content">
+                        <span>Name</span>
+                        <span id="settings-user-name" class="item-value">Loading...</span>
+                    </div>
+                    <i class="fas fa-chevron-right item-arrow"></i>
+                </li>
+                <li class="settings-list-item" id="refreshButton">
+                    <div class="item-icon"><i class="fa-solid fa-rotate-left" style="color: var(--text-color);"></i></div>
+                    <div class="item-content">
+                        <span>Refresh</span>
+                        <!-- <span id="settings-user-email" class="item-value"></span> -->
+                    </div>
+                </li>
+                <!-- <li class="settings-list-item">
+                    <div class="item-icon"><i class="fas fa-lock"></i></div>
+                    <div class="item-content">
+                        <span>Change Password</span>
+                    </div>
+                    <i class="fas fa-chevron-right item-arrow"></i>
+                </li> -->
+            </ul>
+        </div>
+
+
+        <!-- <div class="settings-group">
+            <h3>Notification Settings</h3>
+            <ul class="settings-list">
+                <li class="settings-list-item">
+                    <div class="item-icon"><i class="fas fa-tint"></i></div>
+                    <div class="item-content">
+                        <span>Blood Sugar Reminders</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="notification-sugar-reminders">
+                        <span class="slider round"></span>
+                    </label>
+                </li>
+                <li class="settings-list-item">
+                    <div class="item-icon"><i class="fas fa-pills"></i></div>
+                    <div class="item-content">
+                        <span>Medication Alerts</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="notification-medication-alerts">
+                        <span class="slider round"></span>
+                    </label>
+                </li>
+                <li class="settings-list-item">
+                    <div class="item-icon"><i class="fas fa-running"></i></div>
+                    <div class="item-content">
+                        <span>Activity Goals</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="notification-activity-goals">
+                        <span class="slider round"></span>
+                    </label>
+                </li>
+                <li class="settings-list-item">
+                    <div class="item-icon"><i class="fas fa-bullhorn"></i></div>
+                    <div class="item-content">
+                        <span>App Updates & News</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="notification-app-updates">
+                        <span class="slider round"></span>
+                    </label>
+                </li>
+            </ul>
+        </div> -->
+        
+        <!-- NEW THEME UI -->
+        <!-- <div class="settings-group">
+            <h3>App Theme</h3>
+            <div class="theme-options-modern">
+                <button class="theme-btn" data-theme="light">
+                    <i class="fas fa-sun"></i>
+                    <span>Light</span>
+                </button>
+                <button class="theme-btn" data-theme="dark">
+                    <i class="fas fa-moon"></i>
+                    <span>Dark</span>
+                </button>
+                <button class="theme-btn" data-theme="system">
+                    <i class="fas fa-desktop"></i>
+                    <span>System</span>
+                </button>
+            </div>
+        </div> -->
+        <!-- END OF NEW THEME UI -->
+
+        <!-- <div class="buton">
+            <button id="settings-logout-btn" class="login-button logout-text-button">Log Out</button>
+        </div> -->
+    </main>
+    <!-- REMOVED THE EXTRA </div> THAT WAS HERE -->
+    <!-- Avatar Selection Modal -->
+<div id="avatarModal" class="modal">
+    <div class="modal-content profile-modal">
+        <div class="modal-header">
+            <h3>Choose Your Avatar</h3>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div id="avatarGridModal" class="avatar-grid">
+                <!-- Avatar options will be loaded here by profile.js -->
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="saveProfileImageModal" class="login-button">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+        </div>
+    </div>
+</div>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<!-- Main App Logic -->
+<script src="log/firebaseconfig.js"></script>
+<script src="profile.js"></script>
+<script src="profile-loader.js"></script>
+<script src="theme.js"></script>
+    <script>
+        const refreshButton = document.getElementById('refreshButton');
+
+refreshButton.addEventListener('click', () => {
+    window.location.reload();
+});
+    </script>
+</body>
+</html>

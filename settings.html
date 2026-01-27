@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - SugarTrack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/font-awesome-icons7/css/all.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.7.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/remix-icons/remixicon.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body style="padding-bottom: 0 !important;" oncontextmenu="return false;">
+
+    <!-- Marker for JS to identify this page -->
+    <div id="page-settings-marker" style="display: none;"></div>
+
+    <!-- SETTINGS HEADER -->
+    <div class="settings-header">
+        <button class="back-button" id="settings-back-btn" onclick="window.location.href='dashboard.html';">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <h2>Settings</h2>
+    </div>
+
+    <main class="dashboard-container settings-page-new2">
+        <!-- <div class="profile-section">
+            <div class="profile-image-large-container">
+                <img id="profile-img-settings" src="0.png" alt="Profile Picture" class="profile-image-large">
+            </div>
+            <h2 id="settings-user-name">User name</h2>
+            <br>
+            <p id="settings-user-email">email</p>
+        </div> -->
+<div class="profile-section" onclick="window.location.href='profile.html';">
+  <div class="profile-image-large-container">
+    <img id="profile-img-settings" src="images/user.png" alt="Profile Picture" class="profile-image-large">
+  </div>
+
+  <div class="profile-info">
+    <h2 id="settings-user-name" class="profile-name">User name</h2>
+    <p id="settings-user-email" class="profile-email">email</p>
+  </div>
+</div>
+
+        <div class="settings-group">
+            <h3>Account Details</h3>
+            <ul class="settings-list">
+                <li class="settings-list-item" onclick="window.location.href='account.html';">
+                    <div class="item-icon"><i class="fa-solid fa-lock" ></i></div>
+                    <!-- <div class="item-icon" style="background-color: #ef4444;"><i class="fa-solid fa-lock" style="color: white;"></i></div> -->
+                    <div class="item-content">
+                        <span>Account</span>
+                    </div>
+                    <i class="fas fa-chevron-right item-arrow"></i>
+                </li>
+                <li class="settings-list-item" onclick="window.location.href='profile.html';">
+                    <div class="item-icon"><i class="fas fa-user" ></i></div>
+                    <!-- <div class="item-icon" style="background-color: #3b82f6;"><i class="fas fa-user" style="color: white;"></i></div> -->
+                    <div class="item-content">
+                        <span>Profile</span>
+                    </div>
+                    <i class="fas fa-chevron-right item-arrow"></i>
+                </li>
+                <li class="settings-list-item" onclick="window.location.href='data.html';">
+                    <div class="item-icon"><i class="fa-solid fa-database"></i></div>
+                    <!-- <div class="item-icon" style="background-color: #10b981;"><i class="fa-solid fa-database" style="color: white;"></i></div> -->
+                    <div class="item-content">
+                        <span>Data</span>
+                    </div>
+                    <i class="fas fa-chevron-right item-arrow"></i>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="settings-group">
+            <h3>Other Settings</h3>
+            <ul class="settings-list">
+                <li class="settings-list-item" onclick="window.location.href='theme.html';">
+                    <div class="item-icon"><i class="fa-solid fa-palette"></i></div>
+                    <div class="item-content">
+                        <span>Appearance</span>
+                    </div>
+                    <i class="fas fa-chevron-right item-arrow"></i>
+                </li>
+
+        <!-- <input type="checkbox" id="greetingsToggle" checked>
+        Enable Smart Greetings
+    </label> -->
+
+
+                <!-- <li class="settings-list-item" onclick="window.location.href='updates.html';">
+                    <div class="item-icon"><i class="fa-solid fa-arrows-rotate"></i></div>
+                    <div class="item-content">
+                        <span>Check for Updates</span>
+                    </div>
+                    <i class="fas fa-chevron-right item-arrow"></i>
+                </li> -->
+                <li class="settings-list-item" onclick="window.location.href='about.html';">
+                    <div class="item-icon"><i class="fa-solid fa-info"></i></div>
+                    <div class="item-content">
+                        <span>About</span>
+                    </div>
+                    <i class="fas fa-chevron-right item-arrow"></i>
+                </li>
+            </ul>
+        </div>
+
+
+                <div class="buton">
+            <!-- <button id="save-settings-btn" class="login-button save-changes-button">Save Changes</button> -->
+            <button id="settings-logout-btn" class="login-button logout-text-button">Log Out</button>
+        </div>
+    </main>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    
+    <!-- Main App Logic -->
+    <script src="log/firebaseconfig.js"></script>
+    <script src="slide-transitions.js"></script>
+    <script src="theme.js"></script>
+
+        <script>
+    // Logout functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const logoutBtn = document.getElementById('settings-logout-btn');
+        
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                auth.signOut()
+                    .then(() => {
+                        window.location.href = 'login.html';
+                    })
+                    .catch((error) => {
+                        console.error('Logout error:', error);
+                        alert('Error logging out. Please try again.');
+                    });
+            });
+        }
+    });
+</script>
+    <script>
+        // Load user data for settings page
+        document.addEventListener('DOMContentLoaded', function() {
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    // Load user data from Firestore
+                    db.collection('users').doc(user.uid).get()
+                        .then((doc) => {
+                            if (doc.exists) {
+                                const userData = doc.data();
+                                
+                                // Update profile image
+                                const profileImg = document.getElementById('profile-img-settings');
+                                if (profileImg && userData.profileImage) {
+                                    profileImg.src = userData.profileImage;
+                                }
+                                
+                                // if (profileImg && userData.profileImageUrl) {
+                                //     profileImg.src = userData.profileImageUrl;
+                                // }
+                                
+                                // Update user name
+                                const userName = document.getElementById('settings-user-name');
+                                if (userName) {
+                                    const fullName = [userData.firstName, userData.lastName].filter(Boolean).join(' ');
+                                    userName.textContent = fullName || 'User';
+                                }
+                                
+                                // Update email
+                                const userEmail = document.getElementById('settings-user-email');
+                                if (userEmail) {
+                                    userEmail.textContent = user.email || userData.email || 'No email';
+                                }
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Error loading user data:", error);
+                        });
+                } else {
+                    // Redirect to login if not authenticated
+                    window.location.href = 'login.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

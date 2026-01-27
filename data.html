@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Management - SugarTrack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/font-awesome-icons7/css/all.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.7.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/remix-icons/remixicon.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body style="padding-bottom: 0 !important;">
+
+    <!-- SETTINGS HEADER -->
+    <div class="settings-header">
+        <button class="back-button" id="settings-back-btn" onclick="window.location.href='settings.html';">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <h2>Data Management</h2>
+    </div>
+
+    <main class="dashboard-container settings-page-new2">
+        <div class="data-section">
+            <div class="data-stats">
+                <h3>Your Data Summary</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-tint"></i>
+                        <span id="total-readings" class="stat-value">0</span>
+                        <span class="stat-label">Total Readings</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-chart-line"></i>
+                        <span id="avg-glucose" class="stat-value">--</span>
+                        <span class="stat-label">Average Glucose</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-bullseye"></i>
+                        <span id="time-in-range" class="stat-value">--</span>
+                        <span class="stat-label">Time in Range %</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-actions">
+                <h3>Data Actions</h3>
+                <br>
+                
+                <div class="action-card danger">
+                    <div class="action-info">
+                        <i class="fas fa-trash-alt"></i>
+                        <div>
+                            <h4>Reset All Readings</h4>
+                            <p>Permanently delete all your glucose readings. This action cannot be undone.</p>
+                        </div>
+                    </div>
+                    <br>
+                    <button id="reset-data-btn" class="login-button" style="background-color: var(--out-of-range-color);">
+                    <!-- <button id="reset-data-btn" class="danger-button"> -->
+                        <i class="fas fa-trash"></i> Reset Data
+                    </button>
+                </div>
+
+                <div class="action-card">
+                    <div class="action-info">
+                        <i class="fas fa-file-export"></i>
+                        <div>
+                            <h4>Export Data</h4>
+                            <p>Download all your readings as a PDF or CSV file for backup.</p>
+                        </div>
+                    </div>
+                    <button id="export-data-btn" class="login-button">
+                        <i class="fas fa-download"></i> Export Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Reset Data Confirmation Modal -->
+    <div id="resetModal" class="modal">
+        <div class="modal-content reset-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Reset All Data</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="warning-message">
+                    <i class="fas fa-radiation"></i>
+                    <h4>This action cannot be undone!</h4>
+                    <p>You are about to permanently delete all your glucose readings. This includes:</p>
+                    <ul>
+                        <li>All glucose measurement records</li>
+                        <li>Chart history and trends</li>
+                        <li>Statistical data and averages</li>
+                    </ul>
+                    <p><strong>Your profile settings and account will not be affected.</strong></p>
+                </div>
+                
+                <div class="verification-section">
+                    <label for="confirmReset">Type "DELETE" to confirm:</label>
+                    <input type="text" id="confirmReset" placeholder="Type DELETE here" autocomplete="off">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="cancel-btn" onclick="closeResetModal()">
+                    Cancel
+                </button>
+                <button type="button" class="danger-button" id="confirmResetBtn" disabled onclick="resetAllData()">
+                    <i class="fas fa-trash"></i> Permanently Delete All Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <!-- Main App Logic -->
+    <script src="log/firebaseconfig.js"></script>
+    <script src="theme.js"></script>
+
+    <script>
+        let currentUser = null;
+        let userReadings = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check auth state
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    currentUser = user;
+                    loadUserData(user);
+                    setupEventListeners();
+                } else {
+                    window.location.href = 'login.html';
+                }
+            });
+        });
+
+        function setupEventListeners() {
+            const resetDataBtn = document.getElementById('reset-data-btn');
+            const exportDataBtn = document.getElementById('export-data-btn');
+            const confirmResetInput = document.getElementById('confirmReset');
+            const confirmResetBtn = document.getElementById('confirmResetBtn');
+
+            if (resetDataBtn) {
+                resetDataBtn.addEventListener('click', openResetModal);
+            }
+
+            if (exportDataBtn) {
+                exportDataBtn.addEventListener('click', exportAllData);
+            }
+
+            if (confirmResetInput) {
+                confirmResetInput.addEventListener('input', function() {
+                    confirmResetBtn.disabled = this.value.trim().toUpperCase() !== 'DELETE';
+                });
+            }
+
+            // Close modal events
+            document.querySelectorAll('.close-modal').forEach(btn => {
+                btn.addEventListener('click', closeResetModal);
+            });
+
+            // Close modal when clicking outside
+            document.getElementById('resetModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeResetModal();
+                }
+            });
+        }
+
+        function loadUserData(user) {
+            // Load readings data
+            db.collection('readings')
+                .where('userId', '==', user.uid)
+                .get()
+                .then((querySnapshot) => {
+                    userReadings = [];
+                    querySnapshot.forEach((doc) => {
+                        userReadings.push(doc.data());
+                    });
+                    
+                    updateDataStats(userReadings);
+                })
+                .catch((error) => {
+                    console.error("Error loading data:", error);
+                });
+        }
+
+        function updateDataStats(readings) {
+            const totalReadings = document.getElementById('total-readings');
+            const avgGlucose = document.getElementById('avg-glucose');
+            const timeInRange = document.getElementById('time-in-range');
+
+            totalReadings.textContent = readings.length;
+
+            if (readings.length > 0) {
+                // Calculate average glucose
+                const totalGlucose = readings.reduce((sum, reading) => sum + reading.glucose, 0);
+                const average = totalGlucose / readings.length;
+                avgGlucose.textContent = Math.round(average);
+
+                // Calculate time in range
+                const inRangeCount = readings.filter(r => r.glucose >= 70 && r.glucose <= 180).length;
+                const timeInRangePercent = Math.round((inRangeCount / readings.length) * 100);
+                timeInRange.textContent = timeInRangePercent + '%';
+            } else {
+                avgGlucose.textContent = '--';
+                timeInRange.textContent = '--';
+            }
+        }
+
+        function openResetModal() {
+            const modal = document.getElementById('resetModal');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Reset confirmation input
+            document.getElementById('confirmReset').value = '';
+            document.getElementById('confirmResetBtn').disabled = true;
+        }
+
+        function closeResetModal() {
+            const modal = document.getElementById('resetModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        async function resetAllData() {
+            const resetBtn = document.getElementById('confirmResetBtn');
+            const originalText = resetBtn.innerHTML;
+            
+            resetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+            resetBtn.disabled = true;
+
+            try {
+                // Get all readings for this user
+                const querySnapshot = await db.collection('readings')
+                    .where('userId', '==', currentUser.uid)
+                    .get();
+
+                // Delete each reading
+                const deletePromises = [];
+                querySnapshot.forEach((doc) => {
+                    deletePromises.push(doc.ref.delete());
+                });
+
+                // Wait for all deletions to complete
+                await Promise.all(deletePromises);
+
+                // Update UI
+                userReadings = [];
+                updateDataStats(userReadings);
+                
+                // Close modal and show success message
+                closeResetModal();
+                showNotification('All readings have been successfully deleted!', 'success');
+                
+            } catch (error) {
+                console.error('Error resetting data:', error);
+                showNotification('Error deleting data. Please try again.', 'error');
+            } finally {
+                resetBtn.innerHTML = originalText;
+                resetBtn.disabled = false;
+            }
+        }
+
+        function exportAllData() {
+            if (userReadings.length === 0) {
+                alert('No data to export.');
+                return;
+            }
+
+            // Simple CSV export
+            const csvContent = convertToCSV(userReadings);
+            downloadCSV(csvContent, 'sugartrack-data-export.csv');
+            
+            showNotification('Data exported successfully!', 'success');
+        }
+
+        function convertToCSV(readings) {
+            const headers = ['Date', 'Time', 'Glucose (mg/dL)', 'Comment', 'Timestamp'];
+            const csvRows = [headers.join(',')];
+            
+            readings.forEach(reading => {
+                const row = [
+                    reading.date,
+                    reading.time,
+                    reading.glucose,
+                    `"${(reading.comment || '').replace(/"/g, '""')}"`,
+                    reading.timestamp?.toDate?.().toISOString() || new Date().toISOString()
+                ];
+                csvRows.push(row.join(','));
+            });
+            
+            return csvRows.join('\n');
+        }
+
+        function downloadCSV(csvContent, filename) {
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function showNotification(message, type = 'success') {
+            // Your existing notification function
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#10b981' : '#ef4444'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 0.75rem;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                max-width: 300px;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+    </script>
+
+    <style>
+        .data-section {
+            padding: 1rem 0;
+        }
+
+        .data-stats {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-card {
+            background: var(--bg-color);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-card i {
+            font-size: 2rem;
+            color: var(--in-range-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--placeholder-color);
+        }
+
+        .data-actions {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 1rem;
+        }
+
+        .action-card {
+            /* display: flex; */
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .action-card.danger {
+            border-color: var(--out-of-range-color);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .action-info {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .action-info i {
+            font-size: 1.5rem;
+            margin-top: 0.25rem;
+        }
+
+        .action-card.danger .action-info i {
+            color: var(--out-of-range-color);
+        }
+
+        .action-card:not(.danger) .action-info i {
+            color: var(--in-range-color);
+        }
+
+        .action-info h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--text-color);
+        }
+
+        .action-info p {
+            margin: 0;
+            color: var(--placeholder-color);
+            font-size: 0.9rem;
+        }
+
+        .danger-button {
+            background: var(--out-of-range-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .danger-button:hover:not(:disabled) {
+            background: #dc2626;
+        }
+
+        .danger-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .reset-modal {
+            max-width: 500px;
+        }
+
+        .warning-message {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .warning-message i {
+            font-size: 3rem;
+            color: var(--out-of-range-color);
+            margin-bottom: 1rem;
+        }
+
+        .warning-message h4 {
+            color: var(--out-of-range-color);
+            margin-bottom: 1rem;
+        }
+
+        .warning-message ul {
+            text-align: left;
+            margin: 1rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .warning-message li {
+            margin-bottom: 0.5rem;
+        }
+
+        .verification-section {
+            margin-top: 1.5rem;
+        }
+
+        .verification-section label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .verification-section input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.5rem;
+            background: var(--input-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .verification-section input:focus {
+            border-color: var(--out-of-range-color);
+            outline: none;
+        }
+    </style>
+</body>
+</html>

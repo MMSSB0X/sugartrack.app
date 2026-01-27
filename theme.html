@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Settings - SugarTrack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/font-awesome-icons7/css/all.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.7.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/remix-icons/remixicon.css">
+    <link rel="stylesheet" href="style.css">
+    <!-- No inline script needed - theme.js handles everything -->
+</head>
+<body style="padding-bottom: 0 !important;">
+    <div id="page-settings-marker" style="display: none;"></div>
+
+    <div class="settings-header">
+        <button class="back-button" onclick="window.location.href='settings.html';">
+        <!-- <button class="back-button" onclick="history.back()"> -->
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <h2>Appearance</h2>
+    </div>
+
+    <main class="dashboard-container settings-page-new">
+        <div class="settings-group">
+            <h3>App Theme</h3>
+            <div class="theme-options-modern">
+                <button class="theme-btn" data-theme="light">
+                    <i class="fas fa-sun"></i>
+                    <span>Light</span>
+                </button>
+                <button class="theme-btn" data-theme="dark">
+                    <i class="fas fa-moon"></i>
+                    <span>Dark</span>
+                </button>
+                <button class="theme-btn" data-theme="system">
+                    <i class="fas fa-desktop"></i>
+                    <span>System</span>
+                </button>
+            </div>
+        </div>
+            <div class="settings-group">
+  <h3>Preferences</h3>
+  <div class="settings-list">
+    <div class="switch-container">
+      <div class="switch-content">
+        <div class="switch-icon">
+          <!-- <i class="fas fa-comment-alt"></i> -->
+           <i class="fa-solid fa-face-smile"></i>
+        </div>
+        <div class="switch-text">
+          <span class="switch-label">Smart Greetings</span>
+          <span class="switch-description">Show random welcome messages</span>
+        </div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="greetingsToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+</div>
+    </main>
+   <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    
+    <!-- Main App Logic -->
+    <script src="log/firebaseconfig.js"></script>
+    <script src="log/security.js"></script>
+    <script src="theme.js"></script>
+    <script src="greetings.js"></script>
+</body>
+</html>

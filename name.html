@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change Name - SugarTrack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/font-awesome-icons7/css/all.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.7.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/remix-icons/remixicon.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body style="padding-bottom: 0 !important;">
+
+    <!-- SETTINGS HEADER -->
+    <div class="settings-header">
+        <button class="back-button" id="settings-back-btn" onclick="window.location.href='profile.html';">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <h2>Change Name</h2>
+    </div>
+
+    <main class="dashboard-container settings-page-new2">
+        <form id="name-form" class="login-form" style="max-width: 900px; margin-top: 2rem; gap: 1.5rem;">
+            
+            <div id="error-message" class="error-message" style="display: none;"></div>
+            <div id="success-message" class="success-message" style="display: none;"></div>
+
+            <div class="form-group">
+                <label for="firstName">First Name</label>
+                <!-- profile-loader.js will fill this input -->
+                <input type="text" id="firstName" placeholder="Enter your first name" required data-profile-input="firstName">
+            </div>
+
+            <div class="form-group">
+                <label for="lastName">Last Name (Optional)</label>
+                <!-- profile-loader.js will fill this input -->
+                <input type="text" id="lastName" placeholder="Enter your last name" data-profile-input="lastName">
+            </div>
+
+            <button type="submit" id="save-name-btn" class="login-button">
+                Save Changes
+            </button>
+        </form>
+    </main>
+    
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<!-- Main App Logic -->
+<script src="log/firebaseconfig.js"></script>
+<script src="profile-loader.js"></script>
+<script src="theme.js"></script>
+
+<script>
+// Add name update functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const nameForm = document.getElementById('name-form');
+    const saveNameBtn = document.getElementById('save-name-btn');
+    const errorMessage = document.getElementById('error-message');
+    const successMessage = document.getElementById('success-message');
+
+    if (nameForm) {
+        nameForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+
+            if (!firstName) {
+                showMessage('Please enter your first name', 'error');
+                return;
+            }
+
+            saveNameBtn.disabled = true;
+            saveNameBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            const user = auth.currentUser;
+            if (!user) {
+                showMessage('User not authenticated', 'error');
+                saveNameBtn.disabled = false;
+                saveNameBtn.textContent = 'Save Changes';
+                return;
+            }
+
+            // Update in Firestore
+            db.collection('users').doc(user.uid).update({
+                firstName: firstName,
+                lastName: lastName,
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                showMessage('Name updated successfully!', 'success');
+                // Update the displayed name in real-time
+                setTimeout(() => {
+                    window.location.href = 'profile.html';
+                }, 1500);
+            })
+            .catch((error) => {
+                console.error('Error updating name:', error);
+                showMessage('Error updating name. Please try again.', 'error');
+            })
+            .finally(() => {
+                saveNameBtn.disabled = false;
+                saveNameBtn.textContent = 'Save Changes';
+            });
+        });
+    }
+
+    function showMessage(message, type) {
+        if (type === 'error') {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        } else {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+        
+        setTimeout(() => {
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+        }, 5000);
+    }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SugarTrack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/font-awesome-icons7/css/all.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.7.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/remix-icons/remixicon.css">
+    <link rel="stylesheet" href="RemixIcon_Fonts_v4.8.0/fonts/remixicon.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="system" oncontextmenu="return false;">
+    
+    <!-- Marker for JS to identify this page -->
+    <div id="page-dashboard-marker" style="display: none;"></div>
+
+    <header class="dashboard-header">
+        <div class="logo">
+            <h2 class="logoname">SugarTrack</h2>
+        </div>
+        <!-- <div class="header-right">
+            <button id="export-btn" class="header-button desktop-only">
+                <i class="fas fa-file-pdf"></i> Export Report
+            </button>
+            <div class="profile-image-container header-profile-img-container">
+                <img id="profile-img-header" src="images/user.png" alt="Profile Picture" class="profile-image">
+                <input type="file" id="profile-image-upload-header" accept="image/*" style="display: none;">
+            </div>
+            <button id="logout-btn" class="header-button desktop-only">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div> -->
+        <!-- Replace the existing header-right section in dashboard.html -->
+<div class="header-right">
+    <div class="profile-menu-container">
+        <div class="profile-image-container header-profile-img-container" id="profile-menu-trigger">
+            <img id="profile-img-header" src="images/user.png" alt="Profile Picture" class="profile-image">
+        </div>
+        
+        <!-- Profile Dropdown Menu -->
+        <div class="profile-dropdown-menu" id="profile-dropdown">
+            <div class="profile-menu-header">
+                <div class="profile-menu-avatar">
+                    <img id="dropdown-profile-img" src="images/user.png" alt="Profile" class="profile-image">
+                </div>
+                <div class="profile-menu-info">
+                    <span id="dropdown-user-name">User Name</span>
+                    <span id="dropdown-user-email">user@example.com</span>
+                </div>
+            </div>
+            
+            <div class="profile-menu-items">
+                <a href="#" class="profile-menu-item" onclick="window.location.href='theme.html';">
+                    <!-- <i class="fas fa-user-cog"></i> -->
+                     <i class="fa-solid fa-palette"></i>
+                    <span>Appearance</span>
+                </a>
+                <a href="#" class="profile-menu-item" onclick="window.location.href='settings.html';">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+                <div class="menu-divider"></div>
+                <button class="profile-menu-item logout-btn" id="dropdown-logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+    </header>
+<br>
+<br>
+<br>
+<br>
+    <main class="dashboard-container">
+        <div style="display: flex; gap: 0.5rem; ">
+        <!-- <div style="display: flex; gap: 0.5rem; "> -->
+        <h1 id="dynamicText" >Welcome! <h1 id="welcome-message" ></h1></h1>
+        <!-- <h1 id="dynamicText" >Welcome! <h1 id="welcome-message" style="color: var(--primary-btn-bg);"></h1></h1> -->
+        <!-- <h1 id="welcome-message">Welcome! User</h1> --></div>
+            
+        <div class="metric-card">
+            <h3>Latest Reading</h3> 
+            <div class="reading-display">
+                <span id="latest-reading-value" class="reading-value">--</span> <span class="unit">mg/dL</span>
+                <span id="latest-reading-status" class="status"><i class="fas fa-circle"></i> --</span>
+            </div>
+            <p id="latest-reading-time" class="reading-time">No readings yet</p>
+        </div>
+                <!-- <div class="chart-container" id="chart-report-area">
+            <h3>Last 24 Hours</h3>
+            <span id="avg-display" class="avg-display">-- <span class="unit">mg/dL Avg.</span></span>
+            
+
+        </div> -->
+<!-- Add this to your dashboard.html in the chart container section -->
+<!-- Replace your existing chart container in dashboard.html -->
+<div class="chart-container" id="chart-report-area">
+    
+    <!-- <div class="chart-switcher">
+        <button class="chart-btn active" data-chart="line">
+            <i class="fas fa-chart-line"></i>
+            <span>Trends</span>
+        </button>
+        <button class="chart-btn" data-chart="bar">
+            <i class="fas fa-chart-bar"></i>
+            <span>Patterns</span>
+        </button>
+        <button class="chart-btn" data-chart="weekly">
+            <i class="fas fa-calendar-week"></i>
+            <span>Weekly</span>
+        </button>
+    </div> -->
+            <span id="avg-display" class="avg-display">-- <span class="unit">mg/dL Avg.</span></span>
+
+    <div class="chart-canvas-container">
+        <canvas id="sugar-chart"></canvas>
+        <div id="chart-no-data" class="chart-no-data">
+            <i class="fas fa-chart-line"></i>
+            <p>No glucose data available</p>
+            <small>Add your first reading to see beautiful charts and insights</small>
+        </div>
+        
+    </div>
+
+</div>
+    
+        <div class="metric-grid">
+            <div class="metric-card">
+                <h3>Weekly Average</h3>
+                <span id="weekly-avg-value" class="reading-value">--</span> <span class="unit">mg/dL</span>
+            </div>
+            <div class="metric-card">
+                <h3>Time in Range</h3>
+                <span id="time-in-range-value" class="reading-value">--</span><span class="unit">%</span>
+            </div>
+        </div>
+
+
+
+
+        <h1 id="welcome-message" style="margin-top: 2rem;">Readings</h1>
+        <div class="metric-card">
+            <div class="history-list-container">
+                <p class="login-button view-text-button" style="text-align: center;" onclick="window.location.href='readings.html';">View All Readings</p>
+                <!-- <button class="login-button view-text-button" onclick="window.location.href='readings.html';">View All Readings</button> -->
+            </div>
+            <div class="history-list-container">
+  <!-- Latest 3 readings will be inserted here -->
+  <!-- <button class="login-button view-text-button" onclick="window.location.href='readings.html';">
+    View All Readings
+  </button>
+</div> -->
+
+        </div>
+        </div>
+        <br>
+        <br>
+        <br>
+        <br>
+    </main>
+    
+    <!--=============== NAVBAR ===============-->
+    <nav class="nav">
+        <ul class="nav__list">
+            <!-- <li> -->
+                <!-- <a href="#" class="nav__link active-link"> -->
+                    <i class="ri-home-smile-2-line nav__link" onclick="window.location.href='dashboard.html';"></i>
+                </a>
+            </li>
+            <!-- <li> -->
+                <!-- <a href="#" class="nav__link" onclick="window.location.href='readings.html';"> -->
+                    <i class="fa-regular fa-file-lines nav__link" onclick="window.location.href='readings.html';" style="font-size: 20px;"></i>
+                </a>
+            </li>
+            <!-- <li> -->
+                <button class="nav__expand" id="nav-expand">
+                    <i class="fa-solid fa-plus nav__expand-icon" id="nav-expand-icon" style="font-size: 20px; font-weight: 900;"></i>
+                </button>
+            </li>
+            <!-- <li> -->
+                <!-- <a href="#projects" class="nav__link" title="Comming Soon"> -->
+                    <!-- <i class="ri-inbox-2-line nav__link" title="Comming Soon"></i> -->
+
+    <i class="ri-device-line nav__link" onclick="window.location.href='devices.html';" title="Connect Devices"></i>
+
+                </a>
+            </li>
+            <!-- <li> -->
+                <!-- <a href="#" class="nav__link" onclick="window.location.href='settings.html';"> -->
+                    <i class="ri-settings-3-line nav__link" onclick="window.location.href='settings.html';"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Add Reading Modal -->
+    <div id="addReadingModal" class="modal">
+        <div class="modal-content reading-modal">
+            <div class="modal-header">
+                <h3>Add New Reading</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="add-reading-form" class="login-form">
+                    <div class="form-group">
+                        <label for="glucose-value">Glucose Level (mg/dL)</label>
+                        <input type="number" id="glucose-value" placeholder="Enter glucose level" required min="1" max="600">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reading-comment">Comment (Optional)</label>
+                        <textarea id="reading-comment" placeholder="Add any notes..." rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reading-date">Date</label>
+                        <input type="date" id="reading-date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reading-time">Time</label>
+                        <input type="time" id="reading-time" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" >
+                <button type="button" class="login-button" style="background-color: #ef4444; " onclick="closeAddReadingModal()">
+                    Cancel
+                </button>
+                <button type="button" class="login-button"  onclick="saveNewReading()">
+                    <i class="fas fa-save"></i> Save 
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Libraries - LOAD jsPDF FIRST -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.0/dist/chartjs-adapter-moment.min.js"></script>
+    <script src="jspdf/jspdf.umd.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    
+    <!-- Main App Logic -->
+    <script type="text/javascript" language="javascript" src="log/firebaseconfig.js"></script>
+
+
+<script>
+    // Source - https://stackoverflow.com/a
+// Posted by Addinall
+// Retrieved 2025-11-16, License - CC BY-SA 3.0
+
+//------------------------------
+function unloadJS(scriptName) {
+  var head = document.getElementsByTagName('head').item(0);
+  var js = document.getElementById(scriptName);
+  js.parentNode.removeChild(js);
+}
+
+
+//----------------------
+function unloadAllJS() {
+  var jsArray = new Array();
+  jsArray = document.getElementsByTagName('script');
+  for (i = 0; i < jsArray.length; i++){
+    if (jsArray[i].id){
+      unloadJS(jsArray[i].id)
+    }else{
+      jsArray[i].parentNode.removeChild(jsArray[i]);
+    }
+  }      
+}
+
+</script>
+    <script src="theme.js"></script>
+    <!-- <script src="log/security.js"></script> -->
+     <script  src="log/security.js"></script>
+    <script src="script3.js"></script>
+    <!-- <script src="https://mmssb.github.io/sugartrack.com/dashboard/sources/greetings.js"></script> -->
+    <!-- Add this with your other script tags -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="charts.js"></script>
+    <script>
+        // Add this to your updateDashboardUI function
+function updateDashboardUI(readings) {
+    updateLatestReading(readings);
+    updateMetrics(readings);
+    updateRecentReadingsList(readings);
+    
+    // Call chart functions if available
+    if (window.chartFunctions && window.chartFunctions.updateAllCharts) {
+        window.chartFunctions.updateAllCharts(readings);
+    }
+    
+    // Call suggestions function
+    if (window.suggestFunctions && window.suggestFunctions.updateSuggestions) {
+        window.suggestFunctions.updateSuggestions(readings);
+    }
+}
+    </script>
+    <!-- <script>
+            window.onload = function() {
+        const textElement = document.getElementById('dynamicText');
+        const messages = ["Welcome! ", "Feeling Good Today 😊👍!", "Hello again! ", "Ready to Track your Health  ❤"];
+        const randomIndex = Math.floor(Math.random() * messages.length);
+        textElement.textContent = messages[randomIndex];
+    };
+    </script> -->
+
+    <!-- <p id="welcomeMessage">Welcome!</p> -->
+<!-- <script>
+        window.onload = function() {
+        const welcomeElement = document.getElementById('welcomeMessage');
+        if (!localStorage.getItem('visited')) {
+            // This is the first visit
+            welcomeElement.textContent = "Welcome to our site for the first time!";
+            localStorage.setItem('visited', 'true'); // Mark as visited
+        } else {
+            // Subsequent visit or refresh
+            welcomeElement.textContent = "Welcome back!";
+        }
+    };
+</script> -->
+
+<!-- <script>
+    // The list of messages to display randomly
+const greetings = [
+    "Welcome! ",
+    "Feeling Good Today 😊👍!",
+    "Hello there!",
+    "It's great to see you!",
+    "Hope you have a wonderful day!",
+    "Ready to Track your Health  ❤",
+    "Glad you're here."
+];
+
+// Function to get a random message from the array
+function getRandomMessage() {
+    const randomIndex = Math.floor(Math.random() * greetings.length);
+    return greetings[randomIndex];
+}
+
+// Function to update the H1 tag with the random message
+function updateWelcomeMessage() {
+    // Get the element by its ID
+    const headingElement = document.getElementById('dynamicText');
+    
+    // Check if the element was found before trying to change it
+    if (headingElement) {
+        headingElement.textContent = getRandomMessage();
+    } else {
+        console.error("Error: Element with ID 'dynamicText' not found.");
+    }
+}
+
+// Run the update function when the page loads
+window.onload = updateWelcomeMessage;
+
+</script> -->
+
+
+
+<script>
+    // script3.js - Add these updates
+
+// Make sure allReadings is globally accessible
+window.allReadings = [];
+
+// 4. UPDATE UI ELEMENTS - MODIFY THIS FUNCTION
+function updateDashboardUI(readings) {
+    // Update the global reference
+    window.allReadings = readings || [];
+    
+    updateLatestReading(readings);
+    updateMetrics(readings);
+    updateRecentReadingsList(readings);
+    
+    // Update charts if available - ADD PROPER CHECK
+    if (typeof window.chartFunctions !== 'undefined' && window.chartFunctions.updateAllCharts) {
+        console.log('Updating charts with', readings.length, 'readings');
+        window.chartFunctions.updateAllCharts(readings);
+    } else {
+        console.log('Chart functions not available yet');
+    }
+}
+
+// 3. LOAD DASHBOARD DATA - ENSURE DATA IS PROPERLY LOADED
+function loadDashboardData(user) {
+    // Load user info
+    const userDocRef = db.collection('users').doc(user.uid);
+    userDocRef.get().then((doc) => {
+        if (doc.exists) {
+            const userData = doc.data();
+            const welcomeMessage = document.getElementById('welcome-message');
+            const profileImgHeader = document.getElementById('profile-img-header');
+            
+            if (welcomeMessage) {
+                welcomeMessage.textContent = ` ${userData.firstName || ' User'}`;
+            }
+            if (profileImgHeader && userData.profileImage) {
+                profileImgHeader.src = userData.profileImage;
+            }
+        }
+    }).catch((error) => {
+        console.log("Error getting user document:", error);
+    });
+
+    // Load readings (real-time) - ENSURE TIMESTAMP IS HANDLED CORRECTLY
+    db.collection('readings')
+        .where('userId', '==', user.uid)
+        .orderBy('timestamp', 'desc')
+        .onSnapshot((querySnapshot) => {
+            allReadings = [];
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                // Handle timestamp conversion safely
+                let timestamp;
+                if (data.timestamp && data.timestamp.toDate) {
+                    timestamp = data.timestamp.toDate();
+                } else if (data.created && data.created.toDate) {
+                    timestamp = data.created.toDate();
+                } else if (data.timestamp) {
+                    timestamp = new Date(data.timestamp);
+                } else {
+                    timestamp = new Date();
+                }
+                
+                allReadings.push({
+                    id: doc.id,
+                    ...data,
+                    timestamp: timestamp
+                });
+            });
+            
+            console.log('Loaded', allReadings.length, 'readings from Firebase');
+            
+            // Update UI with the readings
+            updateDashboardUI(allReadings);
+        }, (error) => {
+            console.error("Error getting readings: ", error);
+        });
+}
+</script>
+<script src="greetings.js"></script>
+<script src="slide-transitions.js"></script>
+</body>
+</html>
+
