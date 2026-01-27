@@ -407,7 +407,192 @@
     <script src="log/security.js"></script>
     <script src="script3.js"></script>
 
-<script>
+    <script>
+    // --- GLOBAL VARIABLES ---
+    let html5QrcodeScanner = null;
+    let devicesUnsubscribe = null; // To stop the listener if needed
+    let currentUser = null;
+
+    // --- 1. AUTH & REAL-TIME LISTENER ---
+    // Wait for login, then load devices
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            currentUser = user;
+            console.log("User logged in:", user.uid);
+            loadUserDevices(user.uid);
+        } else {
+            console.log("User not logged in");
+            // Optional: window.location.href = 'login.html';
+        }
+    });
+
+    // Listen to Firestore 'devices' collection in Real-Time
+    function loadUserDevices(uid) {
+        // Stop old listener if exists
+        if (devicesUnsubscribe) devicesUnsubscribe();
+
+        const list = document.getElementById('connected-device-list');
+
+        // Start Listening
+        devicesUnsubscribe = db.collection('users').doc(uid).collection('devices')
+            .orderBy('pairedAt', 'desc')
+            .onSnapshot((snapshot) => {
+                
+                // Clear the list (except static items if you have any, here we clear all)
+                // If you want to keep the "Add" button, put it outside this container in HTML
+                list.innerHTML = '';
+
+                if (snapshot.empty) {
+                    list.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align:center; padding: 2rem; color: #888;">
+                            <i class="ri-watch-line" style="font-size: 2rem; opacity: 0.5;"></i>
+                            <p>No devices connected.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const deviceId = doc.id;
+                    const date = data.pairedAt ? data.pairedAt.toDate().toLocaleDateString() : 'Just now';
+
+                    // Create Device Card HTML
+                    const card = document.createElement('div');
+                    card.className = 'device-card';
+                    card.style.animation = "fadeInUp 0.3s ease";
+                    card.innerHTML = `
+                        <div class="status-dot active"></div>
+                        <div class="device-icon-wrapper" style="background: #e8f5e9; color: #00E676;">
+                            <i class="ri-watch-fill"></i>
+                        </div>
+                        <span class="device-name">${data.name || 'SugarWatch'}</span>
+                        <span class="device-status">Paired: ${date}</span>
+                        <div style="display:flex; gap:5px; width:100%; margin-top:10px;">
+                            <button class="card-action-btn active-btn" style="flex:1">View</button>
+                            <button class="card-action-btn" onclick="unpairDevice('${deviceId}')" 
+                                style="flex:1; color:#ef4444; border-color: #ef44441a; background: #ef44441a;">
+                                Unpair
+                            </button>
+                        </div>
+                    `;
+                    list.appendChild(card);
+                });
+
+            }, (error) => {
+                console.error("Error listening to devices:", error);
+            });
+    }
+
+    // --- 2. PAIRING LOGIC (Connect) ---
+    function handleWatchPairing(qrData) {
+        if (!currentUser) return alert("Please login first.");
+
+        // The Watch sends ID like: "watch_abc123"
+        // If it sends a URL, you might need: qrData.split('data=')[1]
+        const watchId = qrData; 
+
+        console.log("Attempting to pair:", watchId);
+
+        // Step A: Write to User's 'devices' list (Permanent Link)
+        db.collection('users').doc(currentUser.uid).collection('devices').doc(watchId).set({
+            name: "SugarWatch",
+            pairedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            type: "smartwatch",
+            active: true
+        })
+        .then(() => {
+            // Step B: Write to 'pending_setups' (The Handshake)
+            // This tells the Watch: "I am User X, log me in now."
+            return db.collection('pending_setups').doc(watchId).set({
+                userId: currentUser.uid,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        })
+        .then(() => {
+            // Success! The onSnapshot listener above will update the UI automatically.
+            alert("✅ Watch Paired Successfully!");
+        })
+        .catch((error) => {
+            console.error("Pairing Failed:", error);
+            alert("Pairing Error: " + error.message);
+        });
+    }
+
+    // --- 3. UNPAIR LOGIC (Delete) ---
+    function unpairDevice(deviceId) {
+        if(!confirm("Are you sure you want to unpair this device?")) return;
+
+        db.collection('users').doc(currentUser.uid).collection('devices').doc(deviceId).delete()
+        .then(() => {
+            console.log("Device deleted");
+            // UI updates automatically via snapshot
+        })
+        .catch((err) => {
+            console.error("Error deleting:", err);
+            alert("Could not unpair: " + err.message);
+        });
+    }
+
+    // --- 4. CAMERA & SCANNER LOGIC ---
+    function checkCameraSupport() {
+        // Camera access requires HTTPS or Localhost
+        if (location.protocol !== "https:" && location.hostname !== "localhost" && location.hostname !== "127.0.0.1") {
+            alert("⚠️ Security Restriction: Camera access requires HTTPS.\nPlease host this on Firebase Hosting or use Localhost.");
+            return false;
+        }
+        return true;
+    }
+
+    function openScanner() {
+        if (!checkCameraSupport()) return;
+
+        const modal = document.getElementById('scannerModal');
+        modal.classList.add('active');
+        
+        if (!html5QrcodeScanner) {
+            html5QrcodeScanner = new Html5Qrcode("reader");
+        }
+
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+        
+        html5QrcodeScanner.start(
+            { facingMode: "environment" }, 
+            config,
+            (decodedText) => {
+                // On Success
+                const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+                audio.play().catch(e => {}); // Try to beep
+                
+                closeScanner(); // Stop camera
+                handleWatchPairing(decodedText); // Start pairing
+            },
+            (errorMessage) => {
+                // Parse error, ignore
+            }
+        ).catch(err => {
+            console.error("Camera Error:", err);
+            alert("Camera failed to start: " + err);
+            closeScanner();
+        });
+    }
+
+    function closeScanner() {
+        document.getElementById('scannerModal').classList.remove('active');
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.stop().then(() => {
+                html5QrcodeScanner.clear();
+            }).catch(console.error);
+        }
+    }
+
+    // Close modal on outside click
+    document.getElementById('scannerModal').addEventListener('click', function(e) {
+        if (e.target === this) closeScanner();
+    });
+</script>
+
+<!-- <script>
     let html5QrcodeScanner = null;
 
     // 1. Check if camera is supported securely
@@ -511,7 +696,7 @@
         newDevice.style.animation = "fadeInUp 0.5s ease"; // Add animation
         newDevice.innerHTML = `
             <div class="status-dot active"></div>
-            <div class="device-icon-wrapper" style="background: #e8f5e9; color: #00E676;">
+            <div class="device-icon-wrapper" style="background: #e8f5e9; color: #3b82f6;">
                 <i class="ri-watch-fill"></i>
             </div>
             <span class="device-name">SugarWatch ${watchId}</span>
@@ -538,6 +723,6 @@
             closeScanner();
         }
     });
-</script>
+</script> -->
 </body>
 </html>
