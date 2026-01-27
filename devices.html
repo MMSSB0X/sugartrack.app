@@ -186,6 +186,7 @@
             });
 
             // B. SEND SIGNAL TO WATCH (This allows the watch to "Enter OS")
+            // This is the CRITICAL part your old code was missing
             await db.collection('pending_setups').doc(watchId).set({
                 userId: window.currentUser.uid,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
