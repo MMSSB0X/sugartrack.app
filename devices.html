@@ -14,7 +14,7 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     
     <style>
-        /* [Kept your original CSS styles] */
+        /* [Your Original Styles preserved] */
         .scan-widget { background: linear-gradient(135deg, var(--primary-btn-bg), #2563eb); border-radius: 1.5rem; padding: 2rem; color: white; display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3); position: relative; overflow: hidden; }
         .scan-content h2 { font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 700; }
         .scan-btn { background: white; color: var(--primary-btn-bg); border: none; padding: 0.75rem 1.5rem; border-radius: 2rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; }
@@ -97,25 +97,22 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <script src="log/firebaseconfig.js"></script>
     <script src="theme.js"></script>
-
-<script>
-    // GLOBAL VARS attached to WINDOW
+    <script>
+    // 1. ATTACH TO WINDOW so HTML buttons can see them
     window.html5QrCode = null;
     window.currentUser = null;
     window.isScanning = false;
 
-    // 1. AUTH & LOAD
+    // 2. AUTH & LOAD
     auth.onAuthStateChanged((user) => {
         if (user) {
             window.currentUser = user;
             loadDevices();
             if(user.photoURL) document.getElementById('profile-img-header').src = user.photoURL;
-        } else {
-            // window.location.href = 'login.html'; // Uncomment to force login
         }
     });
 
-    // 2. OPEN SCANNER
+    // 3. OPEN SCANNER
     window.openScanner = function() {
         if (location.protocol !== "https:" && location.hostname !== "localhost" && location.hostname !== "127.0.0.1") {
             return alert("⚠️ HTTPS required for Camera.");
@@ -123,6 +120,7 @@
 
         document.getElementById('scannerModal').classList.add('active');
         
+        // Slight delay to allow modal to render before camera starts
         setTimeout(() => {
             if (!window.html5QrCode) window.html5QrCode = new Html5Qrcode("reader");
             
@@ -130,7 +128,7 @@
                 { facingMode: "environment" }, 
                 { fps: 10, qrbox: 250 },
                 onScanSuccess,
-                (err) => {} // Ignore frame errors
+                (err) => {} 
             ).then(() => {
                 document.getElementById('reader-status').style.display = 'none';
                 window.isScanning = true;
@@ -140,7 +138,7 @@
         }, 300);
     }
 
-    // 3. CLOSE SCANNER
+    // 4. CLOSE SCANNER
     window.closeScanner = function() {
         document.getElementById('scannerModal').classList.remove('active');
         if (window.html5QrCode && window.isScanning) {
@@ -151,61 +149,65 @@
         }
     }
 
-    // 4. SCAN SUCCESS -> PAIRING
+    // 5. SCAN SUCCESS
     function onScanSuccess(decodedText) {
         if (decodedText.includes("SUGARTRACK_WATCH")) {
-            // BEEP
-            new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play().catch(()=>{});
+            // Beep
+            const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+            audio.play().catch(e => {});
             
-            // Stop Scanner
+            // Close Scanner immediately
             window.closeScanner();
 
-            // Handle Sync
-            handleSync(decodedText);
+            // Run Sync
+            handleWatchPairing(decodedText);
         }
     }
 
-    // 5. THE HANDSHAKE (SYNC)
-    async function handleSync(qrData) {
+    // 6. PAIRING LOGIC (THE FIX)
+    async function handleWatchPairing(qrData) {
         // Format: SUGARTRACK_WATCH_ID_XXXXX
         const parts = qrData.split('_ID_');
         const watchId = parts[1];
         
         if (!watchId || !window.currentUser) return alert("Error: Invalid ID or not logged in.");
 
-        const loadingMsg = document.createElement('div');
-        loadingMsg.innerHTML = `<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);color:white;display:flex;justify-content:center;align-items:center;z-index:9999;flex-direction:column;"><i class="ri-loader-4-line ri-spin" style="font-size:3rem;"></i><br>Syncing with Watch...</div>`;
-        document.body.appendChild(loadingMsg);
+        // Show a loading text
+        const statusDiv = document.createElement('div');
+        statusDiv.style = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:black;color:white;padding:20px;border-radius:10px;z-index:9999;";
+        statusDiv.innerHTML = "Syncing with Watch...";
+        document.body.appendChild(statusDiv);
 
         try {
-            // A. Save to User Profile
+            // A. Save device to your personal list (Private)
             await db.collection('users').doc(window.currentUser.uid).collection('devices').add({
                 name: `SugarWatch ${watchId.substring(0,4)}`,
                 watchId: watchId,
                 pairedAt: new Date()
             });
 
-            // B. SEND SIGNAL TO WATCH (This allows the watch to "Enter OS")
-            // This is the CRITICAL part your old code was missing
+            // B. THIS IS THE MISSING PART: Send signal to the Watch (Public Handshake)
             await db.collection('pending_setups').doc(watchId).set({
                 userId: window.currentUser.uid,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            setTimeout(() => {
-                loadingMsg.remove();
-                alert("✅ Sync Complete!");
-                loadDevices();
-            }, 1500);
+            // Success!
+            statusDiv.remove();
+            alert("✅ Paired Successfully! Watch should now login.");
+            loadDevices(); // Refresh list
 
         } catch (e) {
-            loadingMsg.remove();
+            statusDiv.remove();
+            console.error(e);
             alert("Sync Failed: " + e.message);
         }
     }
 
+    // 7. LOAD LIST
     function loadDevices() {
         const list = document.getElementById('connected-device-list');
+        // Real-time listener
         db.collection('users').doc(window.currentUser.uid).collection('devices').onSnapshot(snap => {
             list.innerHTML = '';
             snap.forEach(doc => {
@@ -222,8 +224,11 @@
         });
     }
 
+    // 8. DISCONNECT
     window.removeDevice = (id) => {
-        if(confirm("Disconnect?")) db.collection('users').doc(window.currentUser.uid).collection('devices').doc(id).delete();
+        if(confirm("Disconnect this device?")) {
+            db.collection('users').doc(window.currentUser.uid).collection('devices').doc(id).delete();
+        }
     }
 </script>
 </body>
